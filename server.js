@@ -50,6 +50,7 @@ const urlTimestamps = [];
 function addUrl(url) {
     urlTimestamps.push({ url, timestamp: Date.now() });
 }
+// sort of pseudo code on how this may work
 app.get('/mostRecentUrl', (req, res) => {
     // Check if there are any URLs
     if (urlTimestamps.length === 0) {
