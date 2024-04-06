@@ -6,8 +6,6 @@ const urlModels = new Schema({
     pp: String,
     predictions: String,
     userEmail: String,
-})
-  
-  //const userModel = model('urls', urlModels);
-  
-  module.exports = urlModels;
+}, { collection: 'privacy_data' });
+
+module.exports = urlModels;
