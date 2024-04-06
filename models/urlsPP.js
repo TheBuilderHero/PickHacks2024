@@ -5,7 +5,6 @@ const urlModels = new Schema({
     url: String,
     pp: String,
     predictions: String,
-    // sorta like a key 
     userEmail: String,
 })
   

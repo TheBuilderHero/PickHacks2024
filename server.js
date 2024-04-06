@@ -4,11 +4,18 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDB = require('./db.js');
+const userModel = require('./models/userModels.js');
+const urlsPP = require('./models/urlsPP.js');
 
 const app = express();
 const PORT = process.env.PORT || 5001; // Changed port to 5001
 
 connectDB();
+
+//actually defining the schemas
+const User = mongoose.model('User', userModel);
+const Url = mongoose.model('Url', urlsPP);
+
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -26,16 +33,28 @@ app.get('/', (req, res) => {
 
 /****************POST****************** */
 // this end point is for the chrome instance
-app.post('/pp',(req,res)=>{
-    try{
-        const {url, pp} = req.body;
-        res.status(200).send('Policy has been evaluated.')
-        console.log("Sucessful server url, pp", url, pp);
-    } catch(error){
-        console.error('Error during authenication:', error);
-        res.status(500).send("Error sending url and pp, or one of them.")
+app.post('/pp', async (req, res) => {
+    try {
+        // Extract data from the request body
+        const { url, pp, predictions, userEmail } = req.body;
+
+        // Create a new document using the Url model
+        const newUrl = new Url({ url, pp, predictions, userEmail });
+
+        // Save the new document to the database
+        await newUrl.save();
+
+        // Send a success response
+        res.status(200).send('Policy has been evaluated and saved to the database.');
+
+        // Log the success
+        console.log("Successful server url, pp", url, pp);
+    } catch (error) {
+        // Handle errors
+        console.error('Error during authentication:', error);
+        res.status(500).send('Error saving url and pp to the database.');
     }
-})
+});
 
 
 
