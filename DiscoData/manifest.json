@@ -1,0 +1,31 @@
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "Privacy Policy Extractor",
+  "version": "1.0",
+  "description": "Extracts the privacy policy text from the current website.",
+  "permissions": ["tabs", "activeTab", "storage", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "disco_ball_PNGICON.png",
+      "48": "disco_ball_PNGICON.png",
+      "128": "disco_ball_PNGICON.png"
+    }
+  },
+  "icons": {
+    "16": "disco_ball_PNGICON.png",
+    "48": "disco_ball_PNGICON.png",
+    "128": "disco_ball_PNGICON.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
+
