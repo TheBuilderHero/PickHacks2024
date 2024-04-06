@@ -5,7 +5,6 @@ const userModels = new Schema({
     userEmail: String,
     tokens: String,
     urlVisited: String,
-    WebsiteVisited: String,
     //maybe some type of time 
 })
   

@@ -5,10 +5,10 @@ const urlModels = new Schema({
     url: String,
     pp: String,
     predictions: String,
+    // sorta like a key 
     userEmail: String,
-    //maybe some type of time 
 })
   
   //const userModel = model('urls', urlModels);
   
-  module.exports = userModels;
+  module.exports = urlModels;
