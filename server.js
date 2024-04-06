@@ -4,7 +4,6 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDB = require('./db.js');
-const userModel = require('./models/userModels.js');
 const urlsPP = require('./models/urlsPP.js');
 
 const app = express();
@@ -12,8 +11,6 @@ const PORT = process.env.PORT || 5001; // Changed port to 5001
 
 connectDB();
 
-//actually defining the schemas
-const User = mongoose.model('User', userModel);
 const Url = mongoose.model('Url', urlsPP);
 
 
@@ -33,13 +30,13 @@ app.get('/', (req, res) => {
 
 /****************POST****************** */
 // this end point is for the chrome instance
-app.post('/pp', async (req, res) => {
+app.post('/ce', async (req, res) => {
     try {
         // Extract data from the request body
-        const { url, pp, predictions, userEmail } = req.body;
+        const { user,url, pp } = req.body;
 
         // Create a new document using the Url model
-        const newUrl = new Url({ url, pp, predictions, userEmail });
+        const newUrl = new Url({ user, url, pp});
 
         // Save the new document to the database
         await newUrl.save();
@@ -48,47 +45,45 @@ app.post('/pp', async (req, res) => {
         res.status(200).send('Policy has been evaluated and saved to the database.');
 
         // Log the success
-        console.log("Successful server url, pp", url, pp);
+        console.log("Successful server user, url, pp", user, url, pp);
     } catch (error) {
-        // Handle errors
         console.error('Error during authentication:', error);
         res.status(500).send('Error saving url and pp to the database.');
     }
 });
 
+// model logic for calling the model 
+// after the string is returned from model. IT MUST ADD TO CORRECT 
+// USER URL PREDICTION INSTANCE
 
 
-
-// Authentication endpoint
-app.post('/auth', (req, res) => {
+//gets for website to use
+app.get('/gatherUserReport:username', async(req,res)=> {
+    // website needs to send user/email to this end point so we know which
+    // url and prediction to show.
     try {
-        const { token } = req.body;
-        // Google auth token verification logic here
+        const username = req.params.username;
+        if(!user){
+            return res.status(404).send('The user does not exist.')
 
-        // Send a response
-        res.status(200).send('Auth instance successful');
-        console.log("Authenticated!");
-    } catch (error) {
-        // Handle errors gracefully
-        console.error('Error during authentication:', error);
-        res.status(500).send('Error during authentication');
-    }
-});
+        }
+        //This finds the most recent url report
+        const lastUrlEntry = await Url.findOne({ userEmail: user.email }).sort({ _id: -1 });
 
-// Predictions endpoint
-app.post('/predictions', (req, res) => {
-    try {
-        const { modelPredictions } = req.body;
-        console.log("Predictions successful. modelPredictions: ", modelPredictions);
+        if (!lastUrlEntry){
+            return res.status(404).send('No URL found for this user');
+        }
 
-        // Assume some operation that might throw an error
-        // For example:
-        // const result = 1 / 0; // This will throw an error
+        const response = {
+            user,
+            url: lastUrlEntry.url,
+            prediction: lastUrlEntry.predictions
+        }
+        res.send(response);
 
-        res.status(200).send('Predictions have been successfully sent to wherever.');
-    } catch (error) {
-        console.error("Error in processing predictions:", error); // Include the error message
-        res.status(500).send("Predictions could not be published to the database.");
+    } catch(error) {
+        console.error("You are sending the information incorrectly. Cannot retrieve user and info ", error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
