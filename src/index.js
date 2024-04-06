@@ -1,14 +1,45 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.css';
-import App from './App';
+import Home from "./Home"
+import Blogs from "./Blogs"
+import Contact from "./Contact"
+import DataPage from "./DataPage"
+import "./styles.css"
+
+//import App from './App';
 import reportWebVitals from './reportWebVitals';
+import Navbar from "./Navbar";
+import {GoogleOAuthProvider} from "@react-oauth/google";
+
+
+export default function App(){
+    return (
+        <>
+            <Navbar />
+            <div className="container">
+                <Routes>
+                    <Route path ="/" element={<Home />} />
+                    <Route path ="/datapage" element={<DataPage />} />
+                    <Route path ="/contact" element={<Contact />} />
+                </Routes>
+            </div>
+        </>
+
+    );
+}
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+    <GoogleOAuthProvider clientId='6733536360-jll8113tcuuteeb48if2l4hhm50lbqkg.apps.googleusercontent.com'>
   <React.StrictMode>
-    <App />
+      <BrowserRouter>
+          <App />
+      </BrowserRouter>
   </React.StrictMode>
+    </GoogleOAuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
