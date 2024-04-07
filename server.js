@@ -58,34 +58,38 @@ app.post('/ce', async (req, res) => {
 
 
 //gets for website to use
-app.get('/gatherUserReport:username', async(req,res)=> {
-    // website needs to send user/email to this end point so we know which
-    // url and prediction to show.
+app.get('/getUserData', async (req, res) => {
     try {
-        const username = req.params.username;
-        if(!user){
-            return res.status(404).send('The user does not exist.')
+        // Extract the user from the query parameters
+        const { user } = req.query;
 
-        }
-        //This finds the most recent url report
-        const lastUrlEntry = await Url.findOne({ userEmail: user.email }).sort({ _id: -1 });
-
-        if (!lastUrlEntry){
-            return res.status(404).send('No URL found for this user');
+        // Check if the user parameter is provided
+        if (!user) {
+            return res.status(400).send('User parameter is required.');
         }
 
-        const response = {
-            user,
-            url: lastUrlEntry.url,
-            prediction: lastUrlEntry.predictions
-        }
-        res.send(response);
+        // Retrieve the URL and predictions for the specified user from the database
+        const userData = await Url.find({ user: user });
 
-    } catch(error) {
-        console.error("You are sending the information incorrectly. Cannot retrieve user and info ", error);
+        // Check if data is found for the user
+        if (!userData || userData.length === 0) {
+            return res.status(404).send('No data found for this user.');
+        }
+
+        // Extract URL and predictions from the userData
+        const responseData = userData.map(entry => ({
+            url: entry.url
+            //predictions: entry.predictions
+        }));
+
+        // Send the response containing URL and predictions for the user
+        res.send(responseData);
+    } catch (error) {
+        console.error('Error retrieving user data:', error);
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
