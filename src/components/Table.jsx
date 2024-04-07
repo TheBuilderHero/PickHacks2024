@@ -14,7 +14,8 @@ function Table() {
             sortable: true,
         }
     ];
-
+    const baseURL = "localhost:5001/getUserData/?user=";
+    const query = baseURL.concat(localStorage.getItem("profileEmail"))
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
