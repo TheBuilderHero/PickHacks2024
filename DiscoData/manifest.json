@@ -5,21 +5,24 @@
   "version": "1.0",
   "description": "Extracts the privacy policy text from the current website.",
   "permissions": ["tabs", "activeTab", "storage", "scripting"],
+    "host_permissions": [
+    "http://localhost:3000/"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "disco_ball_PNGICON.png",
-      "48": "disco_ball_PNGICON.png",
-      "128": "disco_ball_PNGICON.png"
+      "16": "peekaboo1.png",
+      "48": "peekaboo1.png",
+      "128": "peekaboo1.png"
     }
   },
   "icons": {
-    "16": "disco_ball_PNGICON.png",
-    "48": "disco_ball_PNGICON.png",
-    "128": "disco_ball_PNGICON.png"
+    "16": "peekaboo1.png",
+    "48": "peekaboo1.png",
+    "128": "peekaboo1.png"
   },
   "content_scripts": [
     {

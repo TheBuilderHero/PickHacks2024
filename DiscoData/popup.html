@@ -1,20 +1,50 @@
 <!-- popup.html -->
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>Privacy Policy Extractor</title>
   <style>
     body {
-      width: 200px;
+      width: 250px;
       font-family: Arial, sans-serif;
+      border-radius: 15px; /* Rounded corners */
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for a modern look */
+    }
+    
+    #result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .received {
+      background-color: #DFF0D8; /* Green background for received status */
+      color: #3C763D; /* Dark green text */
+    }
+    
+    .not-received {
+      background-color: #F2DEDE; /* Red background for not received status */
+      color: #A94442; /* Dark red text */
     }
   </style>
 </head>
 <body>
   <h2>Privacy Policy Extractor</h2>
-  <button id="extractButton">Extract Privacy Policy</button>
   <div id="result"></div>
+
   <script src="popup.js"></script>
 </body>
 </html>
+
+
 
