@@ -60,23 +60,17 @@ app.post('/ce', async (req, res) => {
 //gets for website to use
 app.get('/getUserData', async (req, res) => {
     try {
-        // Extract the user from the query parameters
+        
         const { user } = req.query;
 
-        // Check if the user parameter is provided
         if (!user) {
             return res.status(400).send('User parameter is required.');
         }
-
-        // Retrieve the URL and predictions for the specified user from the database
         const userData = await Url.find({ user: user });
 
-        // Check if data is found for the user
         if (!userData || userData.length === 0) {
             return res.status(404).send('No data found for this user.');
         }
-
-        // Extract URL and predictions from the userData
         const responseData = userData.map(entry => ({
             url: entry.url
             //predictions: entry.predictions
@@ -89,6 +83,27 @@ app.get('/getUserData', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+// for every unique url return predictions, for showing histogram 
+app.get('/getAllUserData', async (req, res) => {
+    try {
+        const uniqueUrls = await Url.distinct('url');
+        const predictionsData = [];
+        for (const url of uniqueUrls) {
+            const predictions = await Url.find({ url }, 'predictions');
+            if (predictions.length > 0) {
+                predictionsData.push({ url, predictions });
+            }
+        }
+
+        // Send the predictionsData array as the response
+        res.send(predictionsData);
+    } catch (error) {
+        console.error('Error retrieving user data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 
 app.listen(PORT, () => {
