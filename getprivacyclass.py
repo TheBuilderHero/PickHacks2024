@@ -48,11 +48,9 @@ def get_array_string(input_num):
 
 
 
-def predicted_label(file_path):
+def predicted_label( privacy_policy_text):
     # Read privacy policy text from file
     #file_path = 'privacy_policyNPR.txt'
-    with open(file_path, 'r') as file:
-        privacy_policy_text = file.read()
 
     # Tokenize input text
     inputs = tokenizer(privacy_policy_text, return_tensors='pt', padding=True, truncation=True)

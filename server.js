@@ -5,9 +5,12 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDB = require('./db.js');
 const urlsPP = require('./models/urlsPP.js');
+const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 5001; // Changed port to 5001
+const PORT = process.env.PORT || 5001; 
 
 connectDB();
 
@@ -29,79 +32,76 @@ app.get('/', (req, res) => {
 
 
 /****************POST****************** */
+// This endpoint is for the chrome extension instance
 // this end point is for the chrome instance
+
+
 app.post('/ce', async (req, res) => {
     try {
         // Extract data from the request body
-        const { user,url, pp } = req.body;
+        const { user, url, pp } = req.body;
 
         ///// MODEL CODE ///////
-        // Requiring fs module in which
-        // writeFile function is defined.
-        const fs = require('fs')
-        
+
+        // Check if pp is valid
+        if (pp == null) {
+            throw new Error('pp is null or undefined');
+        }
+
+        // Write the pp string to a temporary text file
         const fileName = 'temp.txt';
-
-        // Write data in 'temp.txt' .
-        fs.writeFile(fileName, pp, (err) => {
-        
-            // In case of a error throw err.
-            if (err) throw err;
-        })
-
-        const { spawn } = require('child_process');
+        fs.writeFileSync(fileName, pp);
 
         // Path to your Python script
         const pythonScript = 'getprivacyclass.py';
 
-        const fullPythonScript = pythonScript.concat(" ", fileName);
-
         // Command to call the Python script
-        const pythonProcess = spawn('python3', [pythonScript]);
+        const pythonProcess = spawn('python3', [pythonScript, fileName]);
 
         // Listen for Python script output
         pythonProcess.stdout.on('data', (data) => {
-        console.log("Output from Python script: ${data}");
+            console.log(`Output from Python script: ${data}`);
         });
 
         // Listen for Python script error
         pythonProcess.stderr.on('data', (data) => {
-        console.error("Error from Python script: ${data}");
+            console.error(`Error from Python script: ${data}`);
         });
 
+        // Wait for the Python script to finish
+        pythonProcess.on('close', async (code) => {
+            if (code === 0) {
+                // Handle success if necessary
 
-        // Asynchronously delete a file
-        fs.unlink(fileName, (err) => {
-            if (err) {
-            // Handle specific error if any
-            if (err.code === 'ENOENT') {
-                console.error('File does not exist.');
+                // Create a new document using the Url model
+                const newUrl = new Url({ user, url, pp, prediction });
+
+                // Save the new document to the database
+                await newUrl.save();
+
+                // Send a success response
+                res.status(200).send('Policy has been evaluated and saved to the database.');
+
+                // Log the success
+                console.log("Successful server user, url, pp, prediction", user, url, pp, prediction);
             } else {
-                throw err;
+                // Send an error response if the Python script fails
+                console.error(`Python script execution failed with code ${code}`);
+                res.status(500).send('Error saving url and pp to the database.');
             }
-            } else {
-            console.log('File deleted!');
-            }
+
+            // Remove the temporary text file
+            fs.unlinkSync(fileName);
         });
 
         ////// MODEL CODE END ///////
-
-        // Create a new document using the Url model
-        const newUrl = new Url({ user, url, pp});
-
-        // Save the new document to the database
-        await newUrl.save();
-
-        // Send a success response
-        res.status(200).send('Policy has been evaluated and saved to the database.');
-
-        // Log the success
-        console.log("Successful server user, url, pp", user, url, pp);
     } catch (error) {
         console.error('Error during authentication:', error);
         res.status(500).send('Error saving url and pp to the database.');
     }
 });
+
+
 
 // model logic for calling the model 
 // after the string is returned from model. IT MUST ADD TO CORRECT 
