@@ -10,9 +10,6 @@ export default function Navbar(){
             <li>
                 <Link to="/datapage">DataPage</Link>
             </li>
-            <li>
-                <Link to="/globaldata">Global Data</Link>
-            </li>
         </ul>
     </nav>
 }

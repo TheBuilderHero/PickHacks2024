@@ -1,78 +1,74 @@
-import DataTable from "react-data-table-component";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-function Table() {
-    const columns = [
-        {
-            name: "User Email",
-            selector: row => row.email,
-            sortable: true,
-        },
-        {
-            name: "URL",
-            selector: row => row.url,
-            sortable: true,
-        }
-    ];
-    const baseURL = "localhost:5001/getUserData/?user=";
-    const query = baseURL.concat(localStorage.getItem("profileEmail"))
+/**
+ * React functional component to fetch URL and prediction data using the Fetch API.
+ * @returns {JSX.Element} Component markup.
+ */
+const Table = () => {
+    // State variables to store data, loading state, and error message
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // useEffect hook to fetch data when the component mounts
     useEffect(() => {
+        // Function to fetch data
         const fetchData = async () => {
             try {
-                const response = await fetch("http://localhost:5001/getUserData/");
+                // Make a GET request to the API endpoint
+                const response = await fetch('http://localhost:5001/getUserData/');
                 if (!response.ok) {
-                    throw new Error("Failed to fetch data.");
+                    console.log("error");
+                    throw new Error('Failed to fetch data');
                 }
+                // Parse response JSON
                 const result = await response.json();
+                console.log(response.text)
+                // Set fetched data to state
                 setData(result);
+                console.log(result);
+                // Set loading state to false
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.log(error);
+                // Set error message if there's an error
+                setError(error.message);
+                // Set loading state to false
                 setLoading(false);
             }
         };
+        // Call fetchData function
         fetchData();
     }, []);
 
-    const handleSearch = (e) => {
-        const searchValue = e.target.value.toLowerCase();
-        const newRows = data.filter((row) =>
-            row.email.toLowerCase().includes(searchValue) ||
-            row.url.toLowerCase().includes(searchValue)
-        );
-        setData(newRows);
-    };
+    // Render loading message if loading state is true
+    if (loading) {
+        return <p>Loading...</p>;
+    }
 
+    // Render error message if error state is not null
+    if (error) {
+        return <p>Error: {error}</p>;
+    }
+
+    // Render data if fetched successfully
     return (
-        <>
-            <h1>print{localStorage.getItem("profileEmail")}</h1>
-            <div className="input-group">
-                <input
-                    type="search"
-                    className="form-control-sm border ps-3"
-                    placeholder="Search"
-                    onChange={handleSearch}
-                />
-            </div>
-            <div className="tableContainer">
-                {loading ? (
-                    <p>Loading..</p>
-                ) : (
-                    <DataTable
-                        columns={columns}
-                        data={data}
-                        fixedHeader
-                        title="User Model"
-                        pagination
-                        selectableRows
-                    />
-                )}
-            </div>
-        </>
+        <div>
+            <h1>Data</h1>
+            <ul>
+
+
+
+                            <p>URL: {data.url}</p>
+                            <p>Prediction: {data.predictions}</p>
+
+
+
+
+            </ul>
+        </div>
     );
-}
+};
 
 export default Table;
+
