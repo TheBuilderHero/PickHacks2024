@@ -1,21 +1,26 @@
+
+const OpenAI = require('openai');
 const express = require('express');
 const bodyParser = require('body-parser');
+const { Configuration, OpenAIApi } = require("openai");
 const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDB = require('./db.js');
 const urlsPP = require('./models/urlsPP.js');
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
 
-const app = express();
-const PORT = process.env.PORT || 5001; 
+
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY // This is also the default, can be omitted
+});
 
 connectDB();
 
 const Url = mongoose.model('Url', urlsPP);
 
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -25,111 +30,58 @@ app.get('/', (req, res) => {
     res.send("Your server is running!");
 });
 
-
-
-
-
-
-
-/****************POST****************** */
+/****************POST******************/
 // This endpoint is for the chrome extension instance
 // this end point is for the chrome instance
-
-
 app.post('/ce', async (req, res) => {
     try {
         // Extract data from the request body
         const { user, url, pp } = req.body;
 
-        ///// MODEL CODE ///////
+        // Model code
+        const message_out = "Write a BRIEF report that looks at First Party Collection/Use, Third Party Sharing/Collection, User Choice/Control, User Access/ Edit and Deletion, Data Retention, Data Security, Policy Change, Do Not Track, International and Specific Audiences, or Other. Given the privacy policy in the following info: " + pp;
 
-        // Check if pp is valid
-        if (pp == null) {
-            throw new Error('pp is null or undefined');
-        }
+        //console.log(pp);
+        const chatCompletion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{"role": "user", "content": message_out}],
+          });
+          console.log(chatCompletion.choices[0].message.content);
+          predictions = chatCompletion.choices[0].message.content;
 
-        // Write the pp string to a temporary text file
-        const fileName = 'temp.txt';
-        fs.writeFileSync(fileName, pp);
+          const newUrl = new Url({ user, url, pp, predictions });
 
-        // Path to your Python script
-        const pythonScript = 'getprivacyclass.py';
 
-        // Command to call the Python script
-        const pythonProcess = spawn('python3', [pythonScript, fileName]);
 
-        // Listen for Python script output
-        pythonProcess.stdout.on('data', (data) => {
-            console.log(`Output from Python script: ${data}`);
-        });
+          await newUrl.save();
 
-        // Listen for Python script error
-        pythonProcess.stderr.on('data', (data) => {
-            console.error(`Error from Python script: ${data}`);
-        });
+          
 
-        // Wait for the Python script to finish
-        pythonProcess.on('close', async (code) => {
-            if (code === 0) {
-                // Handle success if necessary
-
-                // Create a new document using the Url model
-                const newUrl = new Url({ user, url, pp, prediction });
-
-                // Save the new document to the database
-                await newUrl.save();
-
-                // Send a success response
-                res.status(200).send('Policy has been evaluated and saved to the database.');
-
-                // Log the success
-                console.log("Successful server user, url, pp, prediction", user, url, pp, prediction);
-            } else {
-                // Send an error response if the Python script fails
-                console.error(`Python script execution failed with code ${code}`);
-                res.status(500).send('Error saving url and pp to the database.');
-            }
-
-            // Remove the temporary text file
-            fs.unlinkSync(fileName);
-        });
-
-        ////// MODEL CODE END ///////
+          // Log the success
+          console.log("Successful server user, url, pp, prediction", user, url, pp, predictions);
+          res.status(200).send("Success");
+       
     } catch (error) {
         console.error('Error during authentication:', error);
         res.status(500).send('Error saving url and pp to the database.');
     }
 });
 
-
-
-// model logic for calling the model 
-// after the string is returned from model. IT MUST ADD TO CORRECT 
-// USER URL PREDICTION INSTANCE
-
-
-
-
-//gets for website to use
+// Gets for website to use
 app.get('/getUserData', async (req, res) => {
     try {
-        
-        const { user } = req.query;
+        const latestData = await Url.findOne().sort({ _id: -1 });
 
-        if (!user) {
-            return res.status(400).send('User parameter is required.');
+        if (!latestData) {
+            return res.status(404).send('No data found.');
         }
-        const userData = await Url.find({ user: user });
 
-        if (!userData || userData.length === 0) {
-            return res.status(404).send('No data found for this user.');
-        }
-        const responseData = userData.map(entry => ({
-            url: entry.url
-            //predictions: entry.predictions
-        }));
+        const responseData = {
+            url: latestData.url,
+            predictions: latestData.predictions
+        };
 
-        // Send the response containing URL and predictions for the user
+        // Send the response containing the most recent URL and predictions
         res.send(responseData);
     } catch (error) {
         console.error('Error retrieving user data:', error);
@@ -137,7 +89,8 @@ app.get('/getUserData', async (req, res) => {
     }
 });
 
-// for every unique url return predictions, for showing histogram 
+
+// For every unique URL return predictions, for showing histogram
 app.get('/getAllUserData', async (req, res) => {
     try {
         const uniqueUrls = await Url.distinct('url');
@@ -156,8 +109,6 @@ app.get('/getAllUserData', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
