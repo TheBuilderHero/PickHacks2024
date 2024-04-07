@@ -47,7 +47,7 @@ const Home = () =>{
     return(
         <>
             <br/>
-            <h1 className="l_title">Analyzing Your Data Privacy</h1>
+            <h1 className="l_title">Privacy Peekaboo</h1>
             <div className="loginContainer">
                 <Container fluid>
                     <Row>

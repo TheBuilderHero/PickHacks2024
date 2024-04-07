@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.css';
 import Home from "./Home"
-import Blogs from "./Blogs"
-import Contact from "./Contact"
 import DataPage from "./DataPage"
 import "./styles.css"
 
@@ -12,6 +10,8 @@ import "./styles.css"
 import reportWebVitals from './reportWebVitals';
 import Navbar from "./Navbar";
 import {GoogleOAuthProvider} from "@react-oauth/google";
+import GlobalData from "./GlobalData";
+import AboutUs from "./AboutUs";
 
 
 export default function App(){
@@ -22,7 +22,8 @@ export default function App(){
                 <Routes>
                     <Route path ="/" element={<Home />} />
                     <Route path ="/datapage" element={<DataPage />} />
-                    <Route path ="/contact" element={<Contact />} />
+                    <Route path ="/globaldata" element={<GlobalData />} />
+                    <Route path ="/aboutus" element={<AboutUs />} />
                 </Routes>
             </div>
         </>
