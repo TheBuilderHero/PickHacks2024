@@ -1,34 +1,34 @@
 import DataTable from "react-data-table-component";
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 
-function Table(){
+function Table() {
     const columns = [
         {
             name: "User Email",
-            selector: row => data.email,
+            selector: row => row.email,
             sortable: true,
         },
         {
             name: "URL",
-            selector: row => data.url,
+            selector: row => row.url,
             sortable: true,
         }
     ];
 
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            try{
+            try {
                 const response = await fetch("http://localhost:5001/getUserData/");
-                if(!response.ok){
+                if (!response.ok) {
                     throw new Error("Failed to fetch data.");
                 }
                 const result = await response.json();
                 setData(result);
                 setLoading(false);
-            } catch (error){
+            } catch (error) {
                 console.error("Error fetching data:", error);
                 setLoading(false);
             }
@@ -36,53 +36,42 @@ function Table(){
         fetchData();
     }, []);
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let searchValue: Boolean;
-        let emailValue: Boolean;
-        let urlValue: Boolean;
-
-        const newRows = data.filter((data) => {
-            emailValue = data.email
-                .toLowerCase()
-                .includes(e.target.value.toLowerCase());
-            urlValue = data.url
-                .toLowerCase()
-                .includes(e.target.value.toLowerCase());
-
-            if(emailValue){
-                searchValue = emailValue;
-            } else{
-                searchValue = urlValue;
-            }
-            return searchValue;
-        });
+    const handleSearch = (e) => {
+        const searchValue = e.target.value.toLowerCase();
+        const newRows = data.filter((row) =>
+            row.email.toLowerCase().includes(searchValue) ||
+            row.url.toLowerCase().includes(searchValue)
+        );
         setData(newRows);
     };
 
-    return <>
-        <div className="input-group">
-            <input
-                type="search"
-                className="form-control-sm border ps-3"
-                placeholder="Search"
-                onChange={handleSearch}
+    return (
+        <>
+            <h1>print{localStorage.getItem("profileEmail")}</h1>
+            <div className="input-group">
+                <input
+                    type="search"
+                    className="form-control-sm border ps-3"
+                    placeholder="Search"
+                    onChange={handleSearch}
                 />
-        </div>
-        <div className="tableContainer">
-            {loading ? (
-                <p>Loading..</p>
-            ) : (
-            <DataTable
-                columns={columns}
-                data={data}
-                fixedHeader
-                title="User Model"
-                pagination
-                selectableRows
-            />
-            )}
-        </div>
-    </>
+            </div>
+            <div className="tableContainer">
+                {loading ? (
+                    <p>Loading..</p>
+                ) : (
+                    <DataTable
+                        columns={columns}
+                        data={data}
+                        fixedHeader
+                        title="User Model"
+                        pagination
+                        selectableRows
+                    />
+                )}
+            </div>
+        </>
+    );
 }
 
-export default Table
+export default Table;

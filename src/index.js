@@ -20,8 +20,8 @@ export default function App(){
             <Navbar />
             <div className="container">
                 <Routes>
-                    <Route path ="/" element={<Home />} />
-                    <Route path ="/datapage" element={<DataPage />} />
+                    <Route path ="/" element={<Home/>} />
+                    <Route path ="/datapage" element={<DataPage/>} />
                     <Route path ="/globaldata" element={<GlobalData />} />
                     <Route path ="/aboutus" element={<AboutUs />} />
                 </Routes>
@@ -35,11 +35,9 @@ export default function App(){
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <GoogleOAuthProvider clientId='6733536360-jll8113tcuuteeb48if2l4hhm50lbqkg.apps.googleusercontent.com'>
-  <React.StrictMode>
       <BrowserRouter>
           <App />
       </BrowserRouter>
-  </React.StrictMode>
     </GoogleOAuthProvider>
 );
 

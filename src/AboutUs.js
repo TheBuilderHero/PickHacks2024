@@ -1,6 +1,6 @@
 import group from "./pictures/group.jpg";
 
-const AboutUs = () => {
+function AboutUs() {
     return (
         <>
             <div>
@@ -30,6 +30,6 @@ const AboutUs = () => {
 
     );
 
-};
+}
 
 export default AboutUs;
