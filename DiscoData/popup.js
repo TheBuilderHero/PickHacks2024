@@ -12,26 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }).then(function(results) {
         var privacyPolicy = results[0].result;
         console.log(privacyPolicy);  // Log the privacy policy text to the console
-        document.getElementById('result').textContent = privacyPolicy || 'Privacy policy not found';
+        document.getElementById('result').textContent = 'Report Generated';
 
-        // Send extracted privacy policy text, user's email, and privacy policy URL to background.js
-        chrome.runtime.sendMessage({ 
-          action: 'sendPrivacyPolicy',
-          data: {
-            privacyPolicy: privacyPolicy,
-            privacyPolicyUrl: activeTab.url
-          }
-        }, function(response) {
-          if (chrome.runtime.lastError) {
-            console.error('Error sending message:', chrome.runtime.lastError.message);
-          } else if (response && response.data) {
-            console.log('Data sent to backend:', response.data);
-          } else if (response && response.error) {
-            console.error('Error sending data to backend:', response.error);
-          } else {
-            console.warn('Unexpected response:', response);
-          }
-        });
+        // Send extracted privacy policy text and URL to your server
+        sendDataToServer(privacyPolicy, activeTab.url);
 
       }).catch(function(error) {
         console.error('Error executing script:', error);
@@ -70,36 +54,7 @@ function extractPrivacyPolicy() {
     return Promise.all(fetchPromises).then(textContents => {
       privacyPolicyText = textContents.join('\n\n');  // Join text contents with double new lines
       console.log('Privacy policy text:', privacyPolicyText);  // Tester console log statement
-      
-      // Generate TXT and return the download link
-      function generateTXT(text) {
-        return new Promise((resolve, reject) => {
-          // Create a new Blob object
-          const blob = new Blob([text], { type: 'text/plain' });
-          
-          // Generate a unique URL for the Blob object
-          const url = URL.createObjectURL(blob);
-          
-          // Create a new anchor element
-          const a = document.createElement('a');
-          
-          // Set the href and download attributes to the Blob URL
-          a.href = url;
-          a.download = 'privacy_policy.txt';
-          
-          // Append the anchor element to the body and click it to trigger the download
-          document.body.appendChild(a);
-          a.click();
-          
-          // Remove the anchor element from the body
-          document.body.removeChild(a);
-          
-          resolve({ result: url });
-        });
-      }
-
-      // Call generateTXT function
-      return generateTXT(privacyPolicyText.trim());
+      return privacyPolicyText.trim();
     }).catch(error => {
       console.error('Error fetching privacy policy:', error);
       return Promise.reject('Error fetching privacy policy');
@@ -111,5 +66,25 @@ function extractPrivacyPolicy() {
   }
 }
 
+// Function to send data to the server
+function sendDataToServer(pp, url) {
+  var data = {
+    pp: pp, // privacy policy text
+    url: url // URL of the current tab
+  };
 
-
+  fetch('http://localhost:5001/ce', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Data sent to server:', data);
+  })
+  .catch(error => {
+    console.error('Error sending data to server:', error);
+  });
+}

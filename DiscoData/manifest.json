@@ -1,13 +1,11 @@
 // manifest.json
 {
   "manifest_version": 3,
-  "name": "Privacy Policy Extractor",
+  "name": "Privacy Peek-A-Boo",
   "version": "1.0",
   "description": "Extracts the privacy policy text from the current website.",
-  "permissions": ["tabs", "activeTab", "storage", "scripting"],
-    "host_permissions": [
-    "http://localhost:3000/"
-  ],
+  "permissions": ["http://localhost:5001/","tabs", "activeTab", "storage", "scripting"],
+    
   "background": {
     "service_worker": "background.js"
   },
