@@ -19,7 +19,7 @@ import sys
 
 
 # Load pre-trained BERT model and tokenizer
-model_path = 'best_model_trainingV2.pt'  # Update with the correct local file path
+model_path = 'best_model_training42.pt'  # Update with the correct local file path
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 # Instantiate the model
 model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=10)
